@@ -1,0 +1,28 @@
+<html lang="en">
+<head>
+    <title>
+        <%= title %>
+    </title>
+</head>
+<body>
+    <h1>Register</h1>
+    <% if(!(errors.length === 0)){
+        errors.forEach(error => { %>
+            <p><%= error %></p>
+        <%});
+    }%>
+    <form action="" method="post">
+        <label>Username:
+        <input type="text" name="username" placeholder="Username" required value="<%= formData ? formData.username : '' %>">
+        </label>
+        <label>Email:
+        <input type="email" name="email" placeholder="Email" required value="<%= formData ? formData.email : '' %>">
+        </label>
+        <label>Password:
+        <input type="password" name="password" placeholder="Password" required value="<%= formData ? formData.password : '' %>">
+        </label>
+        <input type="submit" value="Register">
+    </form>
+    <a href="login">Login</a>
+</body>
+</html>

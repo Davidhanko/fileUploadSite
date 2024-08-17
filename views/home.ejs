@@ -1,0 +1,33 @@
+<html lang="en">
+<head>
+    <title>
+        <%= title %>
+    </title>
+</head>
+<% const owner = (user.uuid === loggedUser.uuid) ? true : false; %><body>
+    <h1>
+        <%= user.username %>
+    </h1>
+    <p>
+        Email: <%= user.email %>
+    </p>
+    <p>
+        Created: <%= user.created %>
+    </p>
+    <%if(owner){
+    %>
+        <form method="post" action="/<%= user.username %>/folder/create">
+            <input type="text" name="folderName" placeholder="Folder name" required>
+            <input type="submit" value="Create folder">
+        </form>
+    <p>Folders and uploads:</p>
+    <%
+        if(user.folder.length > 0){
+            user.folder.forEach(folder => {
+                %>
+        <a href="/folder/<%=folder.uuid%>"><%=folder.name%></a>
+
+
+    <%})}}%>
+</body>
+</html>
