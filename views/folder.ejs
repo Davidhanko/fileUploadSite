@@ -1,0 +1,29 @@
+<html lang="en">
+<head>
+    <title><%= title %></title>
+</head>
+<body>
+<h1><%= title %></h1>
+<form action="../<%=loggedUser.username%>/folder/create" method="post">
+    <input type="text" placeholder="Folder name" name="folderName">
+    <input type="hidden" name="parentUuid" value="<%= folder.uuid %>">
+    <button type="submit">Create a folder</button>
+</form>
+<form action="../<%=loggedUser.username%>/upload" method="post">
+    <input type="file" name="file">
+    <input type="hidden" name="folderUuid" value="<%= folder.uuid %>">
+    <button type="submit">Upload</button>
+</form>
+<form action="../<%=loggedUser.username%>/<%= folder.uuid %>/update" method="post">
+    <input type="text" placeholder="New folder name" name="folderName" required>
+    <button type="submit">Update folder</button>
+</form>
+<p>Folders and uploads:</p>
+<% if (folder.subFolders && folder.subFolders.length > 0) { %>
+    <h2>Subfolders:</h2>
+    <% folder.subFolders.forEach(subfolder => { %>
+        <a href="/folder/<%= subfolder.uuid %>"><%= subfolder.name %></a><br>
+    <% }) %>
+<% } %>
+</body>
+</html>

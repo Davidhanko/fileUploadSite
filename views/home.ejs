@@ -20,14 +20,22 @@
             <input type="text" name="folderName" placeholder="Folder name" required>
             <input type="submit" value="Create folder">
         </form>
+        <form method="post" action="/<%= user.username %>/upload">
+            <input type="file" name="file" required>
+            <input type="submit" value="Upload">
+        </form>
     <p>Folders and uploads:</p>
     <%
         if(user.folder.length > 0){
             user.folder.forEach(folder => {
                 %>
+            <div style="display: flex">
         <a href="/folder/<%=folder.uuid%>"><%=folder.name%></a>
-
-
+            <form method="post" action="/<%=loggedUser.username%>/<%=folder.uuid%>/delete">
+                <button type="submit">Delete</button>
+            </form>
+    </div>
     <%})}}%>
+
 </body>
 </html>
