@@ -4,25 +4,41 @@
 </head>
 <body>
 <h1><%= title %></h1>
+
+<form action="../<%=loggedUser.username%>/<%= folder.uuid %>/update" method="post">
+    <input type="text" placeholder="New folder name" name="folderName" required>
+    <button type="submit">Update folder</button>
+</form>
+
 <form action="../<%=loggedUser.username%>/folder/create" method="post">
     <input type="text" placeholder="Folder name" name="folderName">
     <input type="hidden" name="parentUuid" value="<%= folder.uuid %>">
     <button type="submit">Create a folder</button>
 </form>
-<form action="../<%=loggedUser.username%>/upload" method="post">
-    <input type="file" name="file">
+
+<form method="post" action="/<%= ownerUser.username %>/upload" enctype="multipart/form-data">
+    <input type="file" name="file" required>
     <input type="hidden" name="folderUuid" value="<%= folder.uuid %>">
-    <button type="submit">Upload</button>
+    <input type="submit" value="Upload">
 </form>
-<form action="../<%=loggedUser.username%>/<%= folder.uuid %>/update" method="post">
-    <input type="text" placeholder="New folder name" name="folderName" required>
-    <button type="submit">Update folder</button>
-</form>
+
 <p>Folders and uploads:</p>
 <% if (folder.subFolders && folder.subFolders.length > 0) { %>
     <h2>Subfolders:</h2>
     <% folder.subFolders.forEach(subfolder => { %>
         <a href="/folder/<%= subfolder.uuid %>"><%= subfolder.name %></a><br>
+    <% }) %>
+<% } %>
+
+<% if (folder.file && folder.file.length > 0) { %>
+    <h2>Files:</h2>
+    <% folder.file.forEach(file => { %>
+        <div style="display: flex">
+            <a href="/file/<%= file.uuid %>"><%= file.name %></a>
+            <form method="post" action="/<%= loggedUser.username %>/<%= file.uuid %>/delete">
+                <button type="submit">Delete</button>
+            </form>
+        </div>
     <% }) %>
 <% } %>
 </body>

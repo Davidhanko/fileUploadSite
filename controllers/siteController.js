@@ -26,13 +26,25 @@ exports.home = async (req, res) => {
                     uuid: true,
                     created: true
                 }
+            },
+            file: {
+                select: {
+                    name: true,
+                    uuid: true,
+                    uploaded: true,
+                    folderUuid: true
+                }
             }
         }
     });
-    res.render('home', {
+
+        user.file = user.file.filter(file => file.folderUuid !== null);
+
+        res.render('home', {
         title: 'Home',
         user: user,
-        loggedUser: loggedUser
+        loggedUser: loggedUser,
+        folder: user.folder
     });}
     catch (error) {
         res.status(500).send(error.message);
@@ -40,51 +52,65 @@ exports.home = async (req, res) => {
 }
 
 exports.getFolder = async (req, res) => {
-    const folder = req.params.folder;
+    const folderUuid = req.params.folder;
     const loggedUser = res.locals.currentUser;
-    try{
-    const folderData = await prisma.folder.findUnique({
-        where: {
-            uuid: folder
-        },
-        select: {
-            name: true,
-            uuid: true,
-            created: true,
-            user: {
-                select: {
-                    username: true
-                }
+    try {
+        const folderData = await prisma.folder.findUnique({
+            where: {
+                uuid: folderUuid
             },
-            file: {
-                select: {
-                    name: true,
-                    uuid: true,
-                    uploaded: true
-                }
-            },
-            subFolders: {
-                where: {
-                    parentUuid: folder
+            select: {
+                name: true,
+                uuid: true,
+                created: true,
+                user: {
+                    select: {
+                        uuid: true,
+                        username: true
+                    }
                 },
-                select: {
-                    name: true,
-                    uuid: true,
-                    created: true
+                file: {
+                    where: {
+                        folderUuid: folderUuid
+                    },
+                    select: {
+                        name: true,
+                        uuid: true,
+                        uploaded: true
+                    }
+                },
+                subFolders: {
+                    where: {
+                        parentUuid: folderUuid
+                    },
+                    select: {
+                        name: true,
+                        uuid: true,
+                        created: true
+                    }
                 }
             }
+        });
+
+        if (!folderData || !folderData.user) {
+            return res.status(404).send('Folder or owner not found');
         }
-    });
-    res.render('folder', {
-        title: folderData.name,
-        folder: folderData,
-        loggedUser: loggedUser
-    });}
-    catch (error) {
+
+        const owner = await prisma.user.findUnique({
+            where: { uuid: folderData.user.uuid },
+            select: { username: true }
+        });
+
+        res.render('folder', {
+            title: folderData.name,
+            folder: folderData,
+            loggedUser: loggedUser,
+            ownerUser: owner
+        });
+    } catch (error) {
         res.status(500).send(error.message);
     }
-
-}
+};
 
 exports.folder = async (req, res) => {
     const username = req.params.username;
@@ -184,5 +210,62 @@ exports.folder = async (req, res) => {
             break;
         default:
             res.status(400).send('Unknown action');
+    }
+};
+
+exports.upload = async (req, res) => {
+    const username = req.params.username;
+    const user = await prisma.user.findUnique({
+        where: { username: username },
+        select: { uuid: true }
+    });
+
+    const folderUuid = req.body.folderUuid;
+    const file = req.file;
+
+    try {
+        if (!file) {
+            console.log('No file uploaded'); // Debugging statement
+            console.log(req.body); // Debugging statement
+            console.log(req.file); // Debugging statement
+            return res.status(400).send('No file uploaded.');
+        }
+
+        // Check if the folder exists
+        const folder = await prisma.folder.findUnique({
+            where: { uuid: folderUuid }
+        });
+
+        const uuidData = uuidv4();
+        const fileData = {
+            name: file.originalname,
+            uuid: uuidData,
+            size: file.size, // Set the size field
+            author: {
+                connect: {
+                    uuid: user.uuid
+                }
+            }
+        };
+
+        // Only connect the folder if it exists
+        if (folder) {
+            fileData.folder = {
+                connect: {
+                    uuid: folderUuid
+                }
+            };
+        } else {
+            console.log('Folder not found'); // Debugging statement
+        }
+
+        await prisma.file.create({
+            data: fileData
+        });
+
+        res.redirect('/' + username + '/home');
+    } catch (error) {
+        console.error('Error:', error); // Debugging statement
+        res.status(500).send(error.message);
     }
 };

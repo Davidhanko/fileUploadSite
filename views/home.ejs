@@ -20,11 +20,12 @@
             <input type="text" name="folderName" placeholder="Folder name" required>
             <input type="submit" value="Create folder">
         </form>
-        <form method="post" action="/<%= user.username %>/upload">
+        <form method="post" action="/<%= user.username %>/upload" enctype="multipart/form-data">
             <input type="file" name="file" required>
+            <input type="hidden" name="folderUuid" value="<%= folder.uuid %>">
             <input type="submit" value="Upload">
         </form>
-    <p>Folders and uploads:</p>
+    <p>Folders and files:</p>
     <%
         if(user.folder.length > 0){
             user.folder.forEach(folder => {
@@ -36,6 +37,16 @@
             </form>
     </div>
     <%})}}%>
-
+    <%if(user.file.length > 0){
+    user.file.forEach(file => {
+    if (!file.folderUuid) { %>
+    <div style="display: flex">
+        <a href="/file/<%=file.uuid%>"><%=file.name%></a>
+        <form method="post" action="/<%=loggedUser.username%>/<%=file.uuid%>/delete">
+            <button type="submit">Delete</button>
+        </form>
+    </div>
+    <%}})}%>
+    %>
 </body>
 </html>

@@ -5,7 +5,7 @@ const expressSession = require('express-session');
 const { PrismaSessionStore } = require('@quixo3/prisma-session-store');
 const { PrismaClient } = require('@prisma/client');
 const passport = require('passport');
-const {join} = require("path");
+const { join } = require("path");
 
 require('./middleware/passport');
 const authRouter = require('./routers/userAuthRouter');
@@ -49,13 +49,13 @@ app.use((req, res, next) => {
 app.use("/", authRouter);
 app.use("/", siteRouter);
 
-app.listen(3000, () => {
-    console.log('Server running on port 3000');
-})
-
 app.use((err, req, res, next) => {
     console.error(err.stack); // Log error stack trace to the console
     res.status(500).send(err.stack); // Send a 500 status and a message to the client
 });
+
+app.listen(3000, () => {
+    console.log('Server running on port 3000');
+})
 
 module.exports = app;
